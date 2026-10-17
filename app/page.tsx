@@ -1,69 +1,104 @@
-import Image from "next/image";
+"use client";
+import { Badge } from "@/components/ui/badge";
+import { HoleBackground } from "@/components/animate-ui/components/backgrounds/hole";
+import { BlueTitle, GrayTitle } from "@/components/animate-ui/reusables";
+import { cn } from "cn";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { ArrowUp } from "lucide-react";
+import { PLACEHOLDERS } from "@/lib/data";
 
 export default function Home() {
+  const { isSignedIn } = useAuth(); // desides if yours signed in or not .
+  const router = useRouter(); // help us to go to another route.
+  const textareaRef = useRef<HTMLTextAreaElement>(null); // for getting reference to perticlar tag.
+
+  // states are client side hook
+  const [prompt, setPrompt] = useState("");
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    if (isFocused || prompt) return;
+    const t = setInterval(() => {
+      setPlaceholderIndex((i) => (i + 1) % PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(t);
+  }, [isFocused, prompt]);
+
+  const handleSubmit = () => {
+    if (!prompt.trim() || !isSignedIn) return;
+    router.push(`/workspace?prompt=${encodeURIComponent(prompt.trim())}`);
+  };
+
+  // Submit on Enter, allow Shift + Enter for newlines
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="min-h-screen bg-[#0a0a0a] selection:bg-white/20">
+      <section className="relative flex flex-col items-center overflow-hidden px-4 pb-24 pt-40 text-center">
+        <HoleBackground
+          strokeColor="rgba(255,255,255,0.05)"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          style={{
+            maskImage:
+              "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)",
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <Badge
+          variant={"outline"}
+          className="relative z-10 gap-2 p-4 backdrop-blur-sm"
+        >
+          <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+          Powered by Gemini 3.6 Flash
+        </Badge>
+
+        <h1 className="mx-auto max-w-3xl text-balance font-serif text-5xl leading-tight tracking-tight sm:text-5xl lg:text-7xl z-10">
+          <GrayTitle>Bring Your Ideas to</GrayTitle>
+          <br />
+          <BlueTitle>Life with One Prompt.</BlueTitle>
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-xl text-balance text-base leading-relaxed text-white/40 z-10">
+          Describe what you want to build. AI writes the code, picks the
+          packages, and renders a live preview all inside your browser.
+        </p>
+
+        {/* prompt Box  */}
+        <div className="relative z-10 mx-auto mt-12 w-full max-w-2xl">
+          <div
+            className={cn(
+              "flex items-end gap-3 rounded-2xl border bg-[#111111]/90 p-2 backdrop-blur-xl duration-200",
+              isFocused
+                ? "border-white/20 ring-1 ring-white/8"
+                : "border-white/8",
+            )}
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+            <textarea
+              ref={textareaRef}
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              className="min-h-12 w-full resize-none bg-transparent px-3 py-3 text-left text-sm text-white placeholder:text-white/40 focus:outline-none sm:text-base"
+              placeholder={PLACEHOLDERS[placeholderIndex]}
+              aria-label="Describe the app you want to build"
+              style={{ maxHeight: 200 }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
