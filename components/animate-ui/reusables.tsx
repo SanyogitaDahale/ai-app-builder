@@ -22,7 +22,7 @@ export const BlueTitle = ({
 
 export const SectionLabel = ({
   children,
-//   className = "",
+
 }: {
   children: React.ReactNode;
 }) => {
@@ -45,7 +45,7 @@ export const SectionHeading = ({
   blue: string;
     }) => {
     return (
-        <h2 className="font-serif text-[clamp(2rem, 4vw, 3rem)] leading-[1.1] tracking-tight">
+        <h2 className="font-serif text-4xl leading-[1.1] tracking-tight">
             <GrayTitle>{gray}</GrayTitle>
             <br />
             <BlueTitle>{blue}</BlueTitle>
@@ -53,3 +53,4 @@ export const SectionHeading = ({
         </h2>
     )
 };
+// [clamp(2rem, 4vw, 3rem)]
