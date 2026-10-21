@@ -9,7 +9,7 @@ import {
 } from "@/components/animate-ui/reusables";
 import { cn } from "cn";
 import { useEffect, useRef, useState } from "react";
-import { SignInButton, useAuth } from "@clerk/nextjs";
+import { PricingTable, SignInButton, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { FEATURES, PLACEHOLDERS, STEPS, SUGGESTIONS } from "@/lib/data";
 import { Button } from "@base-ui/react";
@@ -348,7 +348,21 @@ export default function Home() {
             No Credit card required. Upgrade or downgrade anytime
           </p>
         </div>
-        <div className="mx-auto max-w-3xl">{/* pricing table */}</div>
+        <div className="mx-auto max-w-5xl">
+          {/* pricing table */}
+          <PricingTable
+            checkoutProps={{
+              appearance: {
+                elements: {
+                  drawerRoot: {
+                    zIndex : 2000,
+                  },
+                },
+              },
+            }}
+          />
+          
+        </div>
       </section>
 
       <section className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/8 px-10 py-24 text-center">

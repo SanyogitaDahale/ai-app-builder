@@ -1,6 +1,23 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-export default clerkMiddleware();
+const protectedPaths = ["/workspace", "/projects"];
+
+export default clerkMiddleware(
+  async (auth, request) => {
+    const pathname = request.nextUrl.pathname;
+    const isProtectedRoute = protectedPaths.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`),
+    );
+
+    if (isProtectedRoute) {
+      await auth.protect();
+    }
+  },
+  {
+    signInUrl: "/sign-in",
+    signUpUrl: "/sign-up",
+  },
+);
 
 export const config = {
   matcher: [

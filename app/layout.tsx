@@ -3,7 +3,8 @@ import { DM_Sans, Lora } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/Header";
-import { ClerkProvider } from "@clerk/nextjs"
+import { ClerkProvider } from "@clerk/nextjs";
+import { Suspense } from "react";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <ClerkProvider>
+    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
       <html lang="en" suppressHydrationWarning >
         <body className={`${lora.variable} ${dmSans.variable} font-sans`}>
           <ThemeProvider
@@ -38,7 +39,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             disableTransitionOnChange
           >
             
-            <Header />
+            <Suspense
+              fallback={
+                <header className="fixed left-0 top-0 z-50 h-16 w-full border-b border-white/6 bg-white/7 backdrop-blur-md" />
+              }
+            >
+              <Header />
+            </Suspense>
             <main>{children}</main>
 
           </ThemeProvider>
